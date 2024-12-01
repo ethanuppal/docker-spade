@@ -5,10 +5,16 @@ FROM rust:1.70-alpine3.18
 # 1. Add APK packages
 RUN apk update
 RUN apk add --no-cache \
-       python3 py3-pip py3-virtualenv gcc pkgconf openssl-dev iverilog \
-       llvm17 clang17
+       python3 py3-pip py3-virtualenv gcc pkgconf openssl-dev iverilog
 
-# 2. Install Zig
+# 2. Install ziglang
+RUN apk add curl xz
+ARG ZIGVER=0.13.0
+RUN mkdir -p /deps
+WORKDIR /deps
+RUN curl https://ziglang.org/deps/zig+llvm+lld+clang-$(uname -m)-linux-musl-$ZIGVER.tar.xz  -O && \
+    tar xf zig+llvm+lld+clang-$(uname -m)-linux-musl-$ZIGVER.tar.xz && \
+    mv zig+llvm+lld+clang-$(uname -m)-linux-musl-$ZIGVER/ local/
 RUN apk add --no-cache --repository=https://dl-cdn.alpinelinux.org/alpine/v3.20/community zig
 
 # 3. Setup Python
