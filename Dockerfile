@@ -1,4 +1,4 @@
-FROM rust:1.70-alpine3.20
+FROM rust:1.70-alpine3.18
 
 ## Install packages for swim tests:
 
