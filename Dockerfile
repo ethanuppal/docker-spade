@@ -7,7 +7,7 @@ ENV RUSTUP_HOME=/usr/local/rustup \
 RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y \
     --default-toolchain stable \
     --no-modify-path
-RUN rustc --version && cargo --version
+RUN cargo --version
 
 # B. Install packages for swim tests:
 
