@@ -8,7 +8,8 @@ RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 # 1. Add APK packages
 RUN apt-get -y update
 RUN apt-get install -y \
-       gcc pkg-config python3-venv libssl-dev pipx iverilog # verilator=4.106
+       gcc pkg-config python3-venv libssl-dev pipx iverilog \
+       snapd # verilator=4.106
 
 # 2. Setup Python
 RUN python3 -m venv /opt/venv
