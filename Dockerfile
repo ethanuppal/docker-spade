@@ -9,7 +9,7 @@ RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 RUN apt-get -y update
 RUN apt-get install -y \
        gcc pkg-config python3-venv libssl-dev pipx iverilog \
-       snapd wget xz-utils # verilator=4.106
+       snapd wget xz-utils git # verilator=4.106
 
 #   2. Setup Python
 RUN python3 -m venv /opt/venv
