@@ -2,6 +2,7 @@ FROM ubuntu
 
 # A. Install rust
 RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+ENV PATH="$HOME/.cargo/bin:${PATH}"
 
 # B. Install packages for swim tests:
 
