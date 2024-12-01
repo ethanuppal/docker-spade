@@ -1,8 +1,10 @@
 FROM ubuntu
 
 # A. Install rust
+ENV RUSTUP_HOME=/usr/local/rustup \
+    CARGO_HOME=/usr/local/cargo \
+    PATH=/usr/local/cargo/bin:$PATH
 RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
-ENV PATH="$HOME/.cargo/bin:${PATH}"
 
 # B. Install packages for swim tests:
 
