@@ -5,7 +5,8 @@ FROM rust:1.70-alpine3.18
 # 1. Add APK packages
 RUN apk update
 RUN apk add --no-cache \
-       python3 py3-pip py3-virtualenv gcc pkgconf openssl-dev iverilog
+       python3 py3-pip py3-virtualenv gcc pkgconf openssl-dev iverilog \
+       llvm17 clang17
 
 # 2. Install Zig
 RUN apk add --no-cache --repository=https://dl-cdn.alpinelinux.org/alpine/v3.20/community zig
@@ -20,9 +21,13 @@ RUN pip install pipx
 RUN pipx install maturin==1.2.3
 RUN pipx ensurepath
 
+# Spade
 WORKDIR /home
 RUN git clone https://gitlab.com/spade-lang/spade
+
+# Swim
 WORKDIR /home
 RUN git clone https://gitlab.com/spade-lang/swim
 RUN cd swim && cargo install --path .
+
 WORKDIR /home
