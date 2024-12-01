@@ -1,18 +1,17 @@
 FROM ubuntu
+RUN apt-get -y update
 
 # A. Install rust
+RUN apt-get install -y curl
 ENV RUSTUP_HOME=/usr/local/rustup \
     CARGO_HOME=/usr/local/cargo \
     PATH=/usr/local/cargo/bin:$PATH
-RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y \
-    --default-toolchain stable \
-    --no-modify-path
+RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
 RUN cargo --version
 
 # B. Install packages for swim tests:
 
 #   1. Add APK packages
-RUN apt-get -y update
 RUN apt-get install -y \
        gcc pkg-config python3-venv libssl-dev pipx iverilog \
        snapd wget xz-utils git # verilator=4.106
