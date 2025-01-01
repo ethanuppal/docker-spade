@@ -1,3 +1,3 @@
-# spade-docker
+# docker-spade
 
-Docker image for [Spade](https://spade-lang.org).
+Ubuntu image for [Spade](https://spade-lang.org).
