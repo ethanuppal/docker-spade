@@ -27,4 +27,3 @@ chmod u+x ./spade-docker
 # remove all images managed by the tool
 ./spade-docker clean
 ```
->>>>>>> 9e1ab25 (feat: spade-docker tool)
