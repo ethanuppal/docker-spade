@@ -9,7 +9,7 @@ env:
 
 jobs:
   build_and_push:
-    runs-on: ubuntu-latest
+    runs-on: macos-15
     permissions:
       contents: read
       packages: write
@@ -31,7 +31,8 @@ jobs:
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
       
-      - run: |
+      - name: Build spade-docker
+        run: |
           cargo build
           chmod u+x ./spade-docker
 

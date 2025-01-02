@@ -29,7 +29,7 @@ WORKDIR /home
 RUN git clone $SPADE_GIT spade
 WORKDIR /home/spade
 RUN git reset --hard $SPADE_REV
-RUN cargo install --path spade-compiler
+RUN cargo install --path spade-compiler --target-dir /home/.local/rust-target-dir
 
 WORKDIR /home
 ARG SWIM_GIT
@@ -37,7 +37,7 @@ ARG SWIM_REV
 RUN git clone $SWIM_GIT swim
 WORKDIR /home/swim
 RUN git reset --hard $SWIM_REV
-RUN cargo install --path .
+RUN cargo install --path . --target-dir /home/.local/rust-target-dir
 
 RUN if [ "$TARGETARCH" = "x86_64" ]; then swim install-tools; fi
 
