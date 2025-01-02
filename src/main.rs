@@ -95,6 +95,10 @@ struct BuildCommand {
     /// version of swim to package
     #[argh(option)]
     swim_rev: String,
+
+    /// image tag
+    #[argh(option, short = 't')]
+    tag: Option<String>,
 }
 
 /// List built images.
@@ -191,6 +195,13 @@ fn main() -> io::Result<()> {
                     "--build-arg",
                     &format!("SWIM_REV={}", build_command.swim_rev),
                 ])
+                .args(
+                    build_command
+                        .tag
+                        .as_ref()
+                        .map(|tag| vec!["--tag", tag.as_str()])
+                        .unwrap_or(vec![]),
+                )
                 .arg(".")
                 .args(["--progress", "plain"])
                 .stderr(Stdio::piped())
