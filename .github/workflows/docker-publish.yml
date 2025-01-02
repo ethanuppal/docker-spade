@@ -8,11 +8,10 @@ env:
   CARGO_INCREMENTAL: 0
 
 jobs:
-  build:
+  setup:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      packages: write
 
     steps:
       - name: Checkout repository
@@ -35,10 +34,25 @@ jobs:
           cargo build
           chmod u+x ./spade-docker
 
-      - name: Build and push image
+  build_and_push_x86_64:
+    needs: setup
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+    steps:
+      - name: Build and push x86_64 image
         run: |
-          ./spade-docker build --arch x86_64 --tag ghcr.io/ethanuppal/spade-docker:latest
-          docker push ghcr.io/ethanuppal/spade-docker:latest
-          ./spade-docker build --arch arm64 --tag ghcr.io/ethanuppal/spade-docker:latest
-          docker push ghcr.io/ethanuppal/spade-docker:latest
+          ./spade-docker build --arch x86_64 --tag ghcr.io/ethanuppal/spade-docker:latest-x86_64
+          docker push ghcr.io/ethanuppal/spade-docker:latest-x86_64
 
+  build_and_push_arm64:
+    needs: setup
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+    steps:
+
+      - name: Build and push arm64 image
+        run: |
+          ./spade-docker build --arch arm64 --tag ghcr.io/ethanuppal/spade-docker:latest-arm64
+          docker push ghcr.io/ethanuppal/spade-docker:latest-arm64
