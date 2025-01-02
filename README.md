@@ -19,12 +19,23 @@ Commands:
 
 You can see fine-grained usage information by passing `--help` for each subcommand.
 
-## Local Install
+## Prerequisites
+
+Please install [buildx](https://github.com/docker/buildx), the new build system
+for Docker (the old one is deprecated). Also, make sure to use the official
+Docker daemon.
+
+## Install
 
 ```
 git clone https://github.com/ethanuppal/spade-docker
 cd spade-docker
+
+# to install locally
 chmod u+x ./spade-docker
+
+# to install to $PATH
+cargo install --path .
 ```
 
 Here, we're using the helper script, but you can similarly install
@@ -36,11 +47,11 @@ Here, we're using the helper script, but you can similarly install
 ### Building an image
 
 ```
-# build an image for aarch64 with the given Spade/swim versions
+# build an image for x86_64 with the given Spade/swim versions
 ./spade-docker build \
-    --arch aarch64 \
-    --spade-rev 6ee46e1b35da629d15552c0672d5f470f9a94676 \
-    --swim-rev 2a386a16b0fb3e2ba3a075e073279b25f97d6b56
+    --arch x86_64 \
+    --spade-rev main \
+    --swim-rev main
 ```
 
 Then, using the output hash, you can run the image in a terminal with `docker run --rm -it HASH`.
@@ -53,4 +64,16 @@ Then, using the output hash, you can run the image in a terminal with `docker ru
 
 # remove all images managed by the tool
 ./spade-docker clean
+```
+
+## Uninstall
+
+First, prune all images managed by the tool:
+```
+./spade-docker clean
+```
+
+Then, remove the directory used by the tool to store data:
+```
+rm -rf "$(./spade-docker data-directory 2>/dev/null)"
 ```

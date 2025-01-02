@@ -111,12 +111,18 @@ struct ListCommand {}
 #[argh(subcommand, name = "clean")]
 struct CleanCommand {}
 
+/// Print data directory.
+#[derive(FromArgs)]
+#[argh(subcommand, name = "data-directory")]
+struct DataDirectoryCommand {}
+
 #[derive(FromArgs)]
 #[argh(subcommand)]
 enum Subcommand {
     Build(BuildCommand),
     List(ListCommand),
     Clean(CleanCommand),
+    DataDirectory(DataDirectoryCommand),
 }
 
 /// Manage Spade docker images.
@@ -268,6 +274,10 @@ fn main() -> io::Result<()> {
                     }
                 }
             }
+            Ok(())
+        }
+        Subcommand::DataDirectory(_data_directory_command) => {
+            println!("{}", data_dir().to_string_lossy());
             Ok(())
         }
     }
