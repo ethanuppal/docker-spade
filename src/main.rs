@@ -1,5 +1,6 @@
 use core::str;
 use std::{
+    collections::HashMap,
     fs,
     io::{self, Read, Write},
     path::PathBuf,
@@ -7,14 +8,17 @@ use std::{
 };
 
 use argh::FromArgs;
+use serde::{Deserialize, Serialize};
 
 macro_rules! string_enum {
     (
         #[string_enum(name = $name_string:literal, doc = $doc:literal)]
+        $(#[$meta:meta])*
         enum $name:ident {
             $($variant:ident = $string:literal),* $(,)?
         }
     ) => {
+        $(#[$meta])*
         #[doc = $doc]
         enum $name {
             $($variant),*
@@ -46,6 +50,7 @@ string_enum! {
         name = "architecture",
         doc="Must be supported by both the [Rust image](https://hub.docker.com/_/rust/) and [Zig](https://ziglang.org/download/)."
     )]
+    #[derive(Serialize, Deserialize, Clone)]
     enum Architecture {
         X86_64 = "x86_64",
         Arm64 = "arm64",
@@ -66,13 +71,14 @@ string_enum! {
         name = "Zig version",
         doc = "See the [Zig releases page](https://ziglang.org/download/) for more information."
     )]
+    #[derive(Serialize, Deserialize, Clone)]
     enum ZigVersion {
         V0_13_0 = "0.13.0"
     }
 }
 
 /// Build a new image.
-#[derive(FromArgs)]
+#[derive(FromArgs, Serialize, Deserialize, Clone)]
 #[argh(subcommand, name = "build")]
 struct BuildCommand {
     /// target architecture (arm64, x86_64)
@@ -149,33 +155,30 @@ fn init_log_if_missing() -> io::Result<()> {
     fs::create_dir_all(data_dir())
 }
 
-fn log_image(hash: &str) -> io::Result<()> {
+fn log_image(hash: &str, build_command: BuildCommand) -> io::Result<()> {
     let mut logged_images = retrieve_logged_images()?;
-    if !logged_images.contains(&hash.to_string()) {
-        logged_images.push(hash.to_string());
-    }
+    logged_images.insert(hash.to_string(), build_command);
     try_update_log(&logged_images)
 }
 
-fn retrieve_logged_images() -> io::Result<Vec<String>> {
+fn retrieve_logged_images() -> io::Result<HashMap<String, BuildCommand>> {
     let log_file = data_dir().join("hashes.txt");
     if log_file.exists() {
-        let contents =
-            String::from_utf8(fs::read(log_file)?).expect("bug: non utf8 data written to log file");
-        Ok(contents
-            .split("\n")
-            .map(str::to_string)
-            .filter(|line| !line.is_empty())
-            .collect())
+        let bytes = fs::read(log_file)?;
+        let contents = str::from_utf8(&bytes).expect("bug: non utf8 data written to log file");
+        serde_json::from_str(contents).map_err(io::Error::other)
     } else {
-        Ok(vec![])
+        Ok(HashMap::default())
     }
 }
 
-fn try_update_log(new_log: &[String]) -> io::Result<()> {
+fn try_update_log(new_log: &HashMap<String, BuildCommand>) -> io::Result<()> {
     let temp_file = data_dir().join("hashes.temp.txt");
     let log_file = data_dir().join("hashes.txt");
-    fs::write(&temp_file, new_log.join("\n"))?;
+    fs::write(
+        &temp_file,
+        serde_json::to_string(new_log).expect("failed to serialize"),
+    )?;
     fs::rename(temp_file, log_file)
 }
 
@@ -256,22 +259,23 @@ fn main() -> io::Result<()> {
                 .map(str::trim)
                 .find_map(|segment| segment.strip_prefix("sha256:"))
                 .expect("no hash in `docker build` output");
-            log_image(hash)
+            log_image(hash, build_command)
         }
         Subcommand::List(_list_command) => {
             let logged_images = retrieve_logged_images()?;
-            for (i, image_hash) in logged_images.iter().enumerate() {
-                println!("[{}] {}", i, image_hash);
-            }
+            println!(
+                "{}",
+                serde_json::to_string(&logged_images).expect("failed to serialize")
+            );
             Ok(())
         }
         Subcommand::Clean(_clean_command) => {
-            let logged_images = retrieve_logged_images()?;
-            for (i, image_hash) in logged_images.iter().enumerate() {
+            let mut logged_images = retrieve_logged_images()?;
+            for (image_hash, _) in logged_images.clone() {
                 let image_info_output = Command::new("docker")
                     .arg("image")
                     .arg("inspect")
-                    .arg(image_hash)
+                    .arg(&image_hash)
                     .output()?;
                 let stdout = String::from_utf8(image_info_output.stdout)
                     .expect("`docker image inspect` output was unvalid utf8");
@@ -281,12 +285,15 @@ fn main() -> io::Result<()> {
                     .map(|value| value == "spade-docker")
                     .unwrap_or_default()
                 {
-                    let remove_status = Command::new("docker")
-                        .args(["rmi", "-f", image_hash])
-                        .spawn()?
-                        .wait()?;
-                    if remove_status.success() {
-                        try_update_log(&logged_images[i + 1..])?;
+                    if let Ok(exit_status) = Command::new("docker")
+                        .args(["rmi", "-f", &image_hash])
+                        .spawn()
+                        .and_then(|mut child| child.wait())
+                    {
+                        if exit_status.success() {
+                            logged_images.remove(&image_hash);
+                            try_update_log(&logged_images)?;
+                        }
                     }
                 }
             }
