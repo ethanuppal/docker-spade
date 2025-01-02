@@ -74,14 +74,33 @@ struct BuildCommand {
     #[argh(option, default = "ZigVersion::V0_13_0")]
     zig_version: ZigVersion,
 
+    /// url to git repository of spade to package
+    #[argh(
+        option,
+        default = "String::from(\"https://gitlab.com/spade-lang/spade\")"
+    )]
+    spade_git: String,
+
     /// version of spade to package
     #[argh(option)]
     spade_rev: String,
+
+    /// url to git repository of swim to package
+    #[argh(
+        option,
+        default = "String::from(\"https://gitlab.com/spade-lang/swim\")"
+    )]
+    swim_git: String,
 
     /// version of swim to package
     #[argh(option)]
     swim_rev: String,
 }
+
+/// List built images.
+#[derive(FromArgs)]
+#[argh(subcommand, name = "list")]
+struct ListCommand {}
 
 /// Prune built images.
 #[derive(FromArgs)]
@@ -92,6 +111,7 @@ struct CleanCommand {}
 #[argh(subcommand)]
 enum Subcommand {
     Build(BuildCommand),
+    List(ListCommand),
     Clean(CleanCommand),
 }
 
@@ -123,7 +143,11 @@ fn retrieve_logged_images() -> io::Result<Vec<String>> {
     if log_file.exists() {
         let contents =
             String::from_utf8(fs::read(log_file)?).expect("bug: non utf8 data written to log file");
-        Ok(contents.split("\n").map(str::to_string).collect())
+        Ok(contents
+            .split("\n")
+            .map(str::to_string)
+            .filter(|line| !line.is_empty())
+            .collect())
     } else {
         Ok(vec![])
     }
@@ -153,7 +177,15 @@ fn main() -> io::Result<()> {
                 ])
                 .args([
                     "--build-arg",
+                    &format!("SPADE_GIT={}", build_command.spade_git),
+                ])
+                .args([
+                    "--build-arg",
                     &format!("SPADE_REV={}", build_command.spade_rev),
+                ])
+                .args([
+                    "--build-arg",
+                    &format!("SWIM_GIT={}", build_command.swim_git),
                 ])
                 .args([
                     "--build-arg",
@@ -192,6 +224,13 @@ fn main() -> io::Result<()> {
                 .find_map(|segment| segment.strip_prefix("sha256:"))
                 .expect("no hash in `docker build` output");
             log_image(hash)
+        }
+        Subcommand::List(_list_command) => {
+            let logged_images = retrieve_logged_images()?;
+            for (i, image_hash) in logged_images.iter().enumerate() {
+                println!("[{}] {}", i, image_hash);
+            }
+            Ok(())
         }
         Subcommand::Clean(_clean_command) => {
             let logged_images = retrieve_logged_images()?;
