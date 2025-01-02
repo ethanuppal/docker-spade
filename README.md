@@ -1,6 +1,6 @@
 # docker-spade
 
-Build Ubuntu images for [Spade](https://spade-lang.org).
+Build Linux images for [Spade](https://spade-lang.org).
 
 ```
 $ spade-docker --help
@@ -23,8 +23,8 @@ You can see fine-grained usage information by passing `--help` for each subcomma
 ## Prerequisites
 
 Please install [buildx](https://github.com/docker/buildx), the new build system
-for Docker (the old one is deprecated). Also, make sure to use the official
-Docker daemon.
+for Docker, if you don't have it already (the old one is deprecated). Also, make
+sure to use the official Docker daemon.
 
 ## Install
 
@@ -75,3 +75,5 @@ Then, remove the directory used by the tool to store data:
 ```
 rm -rf "$(./spade-docker data-directory 2>/dev/null)"
 ```
+
+Finally, you can `rm -rf` the cloned directory and `cargo uninstall spade-docker` if applicable.tjj 

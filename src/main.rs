@@ -116,7 +116,7 @@ struct BuildCommand {
     tag: Option<String>,
 }
 
-/// List built images.
+/// List built images as JSON.
 #[derive(FromArgs)]
 #[argh(subcommand, name = "list")]
 struct ListCommand {}
