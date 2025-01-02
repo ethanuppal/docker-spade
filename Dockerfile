@@ -1,36 +1,28 @@
 FROM rust:1.80
 
-ARG TARGET_PLATFORM
-
 LABEL tool="spade-docker"
 
 RUN apt-get -y update
 
-# B. Install packages for swim tests:
-
-#   1. Add APK packages
 RUN apt-get install -y gcc pkg-config libssl-dev python3-dev pipx iverilog \
     wget xz-utils git
 
-#   2. Setup Python
 RUN python3 -m venv /opt/venv
 ENV PATH="/opt/venv/bin:${PATH}"
 ENV PATH="${PATH}:/sbin"
 
-#   3. Install pipx, Maturin 1.2.3
 RUN pip install pipx
 RUN pipx install maturin==1.2.3
 RUN pipx ensurepath
 
-#   4. Install Zig
 ARG ZIG_VERSION
-RUN wget https://ziglang.org/download/$ZIG_VERSION/zig-linux-$TARGET_PLATFORM-$ZIG_VERSION.tar.xz \
-    && tar -xf zig-linux-$TARGET_PLATFORM-$ZIG_VERSION.tar.xz \
-    && mv zig-linux-$TARGET_PLATFORM-$ZIG_VERSION /usr/local/zig \
+ARG ZIG_TARGET_PLATFORM
+RUN wget https://ziglang.org/download/$ZIG_VERSION/zig-linux-$ZIG_TARGET_PLATFORM-$ZIG_VERSION.tar.xz \
+    && tar -xf zig-linux-$ZIG_TARGET_PLATFORM-$ZIG_VERSION.tar.xz \
+    && mv zig-linux-$ZIG_TARGET_PLATFORM-$ZIG_VERSION /usr/local/zig \
     && ln -s /usr/local/zig/zig /usr/local/bin/zig \
-    && rm zig-linux-$TARGET_PLATFORM-$ZIG_VERSION.tar.xz
+    && rm zig-linux-$ZIG_TARGET_PLATFORM-$ZIG_VERSION.tar.xz
 
-# C. Spade
 ARG SPADE_GIT
 ARG SPADE_REV
 WORKDIR /home
@@ -39,7 +31,6 @@ WORKDIR /home/spade
 RUN git reset --hard $SPADE_REV
 RUN cargo install --path spade-compiler
 
-# D. Swim
 WORKDIR /home
 ARG SWIM_GIT
 ARG SWIM_REV
@@ -47,5 +38,7 @@ RUN git clone $SWIM_GIT swim
 WORKDIR /home/swim
 RUN git reset --hard $SWIM_REV
 RUN cargo install --path .
+
+RUN if [ "$TARGETARCH" = "x86_64" ]; then swim install-tools; fi
 
 WORKDIR /home

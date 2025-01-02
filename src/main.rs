@@ -48,7 +48,16 @@ string_enum! {
     )]
     enum Architecture {
         X86_64 = "x86_64",
-        Aarch64 = "aarch64",
+        Arm64 = "arm64",
+    }
+}
+
+impl Architecture {
+    fn to_zig_string(&self) -> &'static str {
+        match self {
+            Architecture::X86_64 => "x86_64",
+            Architecture::Arm64 => "aarch64",
+        }
     }
 }
 
@@ -66,11 +75,11 @@ string_enum! {
 #[derive(FromArgs)]
 #[argh(subcommand, name = "build")]
 struct BuildCommand {
-    /// target architecture
+    /// target architecture (arm64, x86_64)
     #[argh(option, short = 'a', long = "arch")]
     architecture: Architecture,
 
-    /// version of zig to install
+    /// version of zig to install (e.g., 0.13.0)
     #[argh(option, default = "ZigVersion::V0_13_0")]
     zig_version: ZigVersion,
 
@@ -81,7 +90,7 @@ struct BuildCommand {
     )]
     spade_git: String,
 
-    /// version of spade to package
+    /// version of spade to package, e.g. a branch name or commit hash
     #[argh(option, default = "String::from(\"main\")")]
     spade_rev: String,
 
@@ -92,11 +101,11 @@ struct BuildCommand {
     )]
     swim_git: String,
 
-    /// version of swim to package
+    /// version of swim to package, e.g. a branch name or commit hash
     #[argh(option, default = "String::from(\"main\")")]
     swim_rev: String,
 
-    /// image tag
+    /// image tag, passed to `--tag` directly
     #[argh(option, short = 't')]
     tag: Option<String>,
 }
@@ -178,8 +187,15 @@ fn main() -> io::Result<()> {
             let mut stderr = Command::new("docker")
                 .arg("build")
                 .args([
+                    "--platform",
+                    &format!("linux/{}", build_command.architecture),
+                ])
+                .args([
                     "--build-arg",
-                    &format!("TARGET_PLATFORM={}", build_command.architecture),
+                    &format!(
+                        "ZIG_TARGET_PLATFORM={}",
+                        build_command.architecture.to_zig_string()
+                    ),
                 ])
                 .args([
                     "--build-arg",
