@@ -15,6 +15,7 @@ Commands:
   build             Build a new image.
   list              List built images.
   clean             Prune built images.
+  data-directory    Print data directory.
 ```
 
 You can see fine-grained usage information by passing `--help` for each subcommand.
@@ -48,10 +49,7 @@ Here, we're using the helper script, but you can similarly install
 
 ```
 # build an image for x86_64 with the given Spade/swim versions
-./spade-docker build \
-    --arch x86_64 \
-    --spade-rev main \
-    --swim-rev main
+./spade-docker build --arch x86_64
 ```
 
 Then, using the output hash, you can run the image in a terminal with `docker run --rm -it HASH`.

@@ -82,7 +82,7 @@ struct BuildCommand {
     spade_git: String,
 
     /// version of spade to package
-    #[argh(option)]
+    #[argh(option, default = "String::from(\"main\")")]
     spade_rev: String,
 
     /// url to git repository of swim to package
@@ -93,7 +93,7 @@ struct BuildCommand {
     swim_git: String,
 
     /// version of swim to package
-    #[argh(option)]
+    #[argh(option, default = "String::from(\"main\")")]
     swim_rev: String,
 
     /// image tag
