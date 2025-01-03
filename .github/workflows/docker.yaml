@@ -47,6 +47,6 @@ jobs:
           docker push ghcr.io/ethanuppal/spade-docker:latest-arm64
 
       - name: Combine images
-        run: docker buildx imagetools crate --tag ghcr.io/ethanuppal/spade-docker:latest \
+        run: docker buildx imagetools create --tag ghcr.io/ethanuppal/spade-docker:latest \
           ghcr.io/ethanuppal/spade-docker:latest-x86_64 \
           ghcr.io/ethanuppal/spade-docker:latest-arm64
