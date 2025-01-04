@@ -28,6 +28,8 @@ sure to use the official Docker daemon.
 
 ## Install
 
+You can install from source as follows:
+
 ```
 git clone https://github.com/ethanuppal/spade-docker
 cd spade-docker
@@ -37,6 +39,12 @@ chmod u+x ./spade-docker
 
 # to install to $PATH
 cargo install --path .
+```
+
+You can also grab a version from <crates.io>:
+
+```
+cargo install spade-docker
 ```
 
 Here, we're using the helper script, but you can similarly install
