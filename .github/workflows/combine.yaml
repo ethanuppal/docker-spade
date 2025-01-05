@@ -23,6 +23,14 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Combine images
-        run: docker buildx imagetools create --tag ghcr.io/ethanuppal/spade-docker:latest \
-          -f ghcr.io/ethanuppal/spade-docker:latest-x86_64 \
-          -f ghcr.io/ethanuppal/spade-docker:latest-arm64
+        run: |
+          docker manifest create ghcr.io/ethanuppal/spade-docker:latest \
+            ghcr.io/ethanuppal/spade-docker:latest-x86_64 \
+            ghcr.io/ethanuppal/spade-docker:latest-arm64
+          docker manifest annotate ghcr.io/ethanuppal/spade-docker:latest ghcr.io/ethanuppal/spade-docker:latest-x86_64 --os linux --arch amd64
+          docker manifest annotate ghcr.io/ethanuppal/spade-docker:latest ghcr.io/ethanuppal/spade-docker:latest-arm64 --os linux --arch arm64
+          docker manifest push ghcr.io/ethanuppal/spade-docker:latest
+
+          #docker buildx imagetools create --tag ghcr.io/ethanuppal/spade-docker:latest \
+        #-f ghcr.io/ethanuppal/spade-docker:latest-x86_64 \
+        # -f ghcr.io/ethanuppal/spade-docker:latest-arm64
