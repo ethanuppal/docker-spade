@@ -210,6 +210,10 @@ fn main() -> io::Result<()> {
                 ])
                 .args([
                     "--build-arg",
+                    &format!("TARGET_PLATFORM={}", build_command.architecture),
+                ])
+                .args([
+                    "--build-arg",
                     &format!(
                         "ZIG_TARGET_PLATFORM={}",
                         build_command.architecture.to_zig_string()

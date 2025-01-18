@@ -39,6 +39,6 @@ WORKDIR /home/swim
 RUN git reset --hard $SWIM_REV
 RUN cargo install --path . --target-dir /home/.local/rust-target-dir
 
-RUN if [ "$TARGETARCH" = "x86_64" ]; then swim install-tools; fi
+RUN if [ "$TARGET_PLATFORM" = "x86_64" ]; then swim install-tools; fi
 
 WORKDIR /home
