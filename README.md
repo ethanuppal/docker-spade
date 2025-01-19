@@ -31,7 +31,8 @@ You can see fine-grained usage information by passing `--help` for each subcomma
 
 Please install [buildx](https://github.com/docker/buildx), the new build system
 for Docker, if you don't have it already (the old one is deprecated). Also, make
-sure to use the official Docker daemon.
+sure to use the official Docker daemon. You can, however, use `podman` to
+download and run the built images.
 
 ## Install
 
