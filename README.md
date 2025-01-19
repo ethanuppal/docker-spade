@@ -1,6 +1,13 @@
 # docker-spade
 
-Build Linux images for [Spade](https://spade-lang.org).
+> [!TIP]
+> You can use prebuilt images right now! See the [Spade docs](https://docs.spade-lang.org/installation.html) for details:
+>
+> ```shell
+> docker run -it --rm ghcr.io/ethanuppal/spade-docker:latest
+> ```
+
+Build Docker images for [Spade](https://spade-lang.org).
 
 ```
 $ spade-docker --help
